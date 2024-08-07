@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout,update_session_auth_hash
 from .decorators import login_required
 from .forms import UserRegistrationForm, UserLoginForm
 from .models import Seat, Ticket, Screening, Movie, User, Genre
@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.contrib import messages
 
 
 def convert_youtube_url(url):
@@ -38,12 +39,48 @@ def show_main(request):
     unique_movies = {screening.movie for screening in active_screenings}
     return render(request, 'schedule/main.html', {'unique_movies': unique_movies})
 
-@csrf_exempt
-@login_required(login_url='/login/')
-def profile(request, user_id):
-    user=request.user
-    tickets = Ticket.objects.filter(user=user)
-    return render(request, 'schedule/profile.html', {'user': user, 'tickets': tickets})
+from .forms import EmailChangeForm, CustomPasswordChangeForm
+from .models import Ticket
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+from .forms import EmailChangeForm, CustomPasswordChangeForm
+from .models import Ticket
+
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        email_form = EmailChangeForm(instance=request.user)
+        password_form = CustomPasswordChangeForm(request.user)
+
+        if 'email_change' in request.POST:
+            email_form = EmailChangeForm(request.POST, instance=request.user)
+            if email_form.is_valid():
+                email_form.save()
+                messages.success(request, 'Your email was successfully updated!')
+                return redirect('profile')
+        elif 'password_change' in request.POST:
+            password_form = CustomPasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)  # Important!
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('profile')
+    else:
+        email_form = EmailChangeForm(instance=request.user)
+        password_form = CustomPasswordChangeForm(request.user)
+
+    tickets = Ticket.objects.filter(user=request.user)
+    return render(request, 'schedule/profile.html', {
+        'email_form': email_form,
+        'password_form': password_form,
+        'tickets': tickets
+    })
+
 
 @csrf_exempt
 def refund_ticket(request, ticket_id):

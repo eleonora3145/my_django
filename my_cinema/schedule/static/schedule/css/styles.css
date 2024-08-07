@@ -23,6 +23,48 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.profile-container form{
+    width: 50vh;
+}
+.profile-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #a69e9e;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tickets-container {
+    margin-top: 20px;
+}
+
+.tickets-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.ticket {
+    width: 200px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.ticket img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+
 .register-container {
 
     max-width: 500px;
@@ -131,12 +173,6 @@ button:hover {
     width: 90%;
     padding: 10px;
 
-}
-.profile-container{
-    margin: 20px;
-    padding: 20px;
-    background-color: rgb(0, 0, 0, 0.7);
-    color: #a69e9e;
 }
 
 .topnav {

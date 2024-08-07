@@ -3,24 +3,38 @@
 
 {% block content %}
 <div class="profile-container">
-    <p>E-mail: {{ user.email }}</p>
-    <p>Password: {{ user.password }}</p>
-<div class="tickets-container">
-    <h2>Your Tickets:</h2>
-    {% if tickets %}
-        <ul>
-            {% for ticket in tickets %}
-                <li id="ticket-{{ ticket.id }}">
-                    <p>Title: {{ ticket.screening.movie.title }}</p>
-                    <p>Seat Number: {{ ticket.seat_number }}</p>
-                    <button class="refund-button" data-ticket-id="{{ ticket.id }}">Refund</button>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You have no tickets.</p>
-    {% endif %}
-</div>
+    <h2>Update Email</h2>
+    <form method="POST" action="{% url 'profile' %}">
+        {% csrf_token %}
+        {{ email_form.as_p }}
+        <button type="submit" name="email_change">Update Email</button>
+    </form>
+
+    <h2>Change Password</h2>
+    <form method="POST" action="{% url 'profile' %}">
+        {% csrf_token %}
+        {{ password_form.as_p }}
+        <button type="submit" name="password_change">Change Password</button>
+    </form>
+
+    <div class="tickets-container">
+        <h2>Your Tickets:</h2>
+        {% if tickets %}
+            <div class="tickets-grid">
+                {% for ticket in tickets %}
+                    <div class="ticket" id="ticket-{{ ticket.id }}">
+                        <img src="{{ ticket.screening.movie.photo }}" alt="{{ ticket.screening.movie.title }}">
+                        <p>Title: {{ ticket.screening.movie.title }}</p>
+                        <p>Date: {{ ticket.screening.start_time }}</p>
+                        <p>Seat Number: {{ ticket.seat_number }}</p>
+                        <button class="refund-button" data-ticket-id="{{ ticket.id }}">Refund</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You have no tickets.</p>
+        {% endif %}
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
