@@ -1,0 +1,50 @@
+{% extends 'schedule/layout.html' %}
+{% block title %} <title>Profile</title> {% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <p>E-mail: {{ user.email }}</p>
+    <p>Password: {{ user.password }}</p>
+<div class="tickets-container">
+    <h2>Your Tickets:</h2>
+    {% if tickets %}
+        <ul>
+            {% for ticket in tickets %}
+                <li id="ticket-{{ ticket.id }}">
+                    <p>Title: {{ ticket.screening.movie.title }}</p>
+                    <p>Seat Number: {{ ticket.seat_number }}</p>
+                    <button class="refund-button" data-ticket-id="{{ ticket.id }}">Refund</button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no tickets.</p>
+    {% endif %}
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.refund-button').click(function(){
+        var ticketId = $(this).data('ticket-id');
+        var button = $(this);
+
+        $.ajax({
+            url: '{% url "refund_ticket" 0 %}'.replace('/0/', '/' + ticketId + '/'),
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#ticket-' + ticketId).remove();
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

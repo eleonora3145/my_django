@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000000;
+        }
+        .cinema {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-gap: 10px;
+        }
+        .seat {
+            width: 40px;
+            height: 40px;
+            background-color: #ccc;
+            border: 1px solid #999;
+            cursor: pointer;
+            text-align: center;
+            line-height: 40px;
+        }
+        .seat.busy {
+            background-color: #ff4d4d;
+            cursor: not-allowed;
+        }
+        .seat.selected {
+            background-color: #4caf50;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+  {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+<div class="cinema" id="cinema"></div>
+<button id="buyButton">Buy</button>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cinema = document.getElementById('cinema');
+        const buyButton = document.getElementById('buyButton');
+        const screeningId = {{ screening.id }};
+        let seatData = [];
+
+        fetch(`/get_seats/${screeningId}/`)
+            .then(response => response.json())
+            .then(data => {
+                seatData = data.seats;
+                seatData.forEach(seat => {
+                    const seatElement = document.createElement('div');
+                    seatElement.classList.add('seat');
+                    seatElement.textContent = seat.number; // Add seat number to each seat element
+                    if (seat.busy) {
+                        seatElement.classList.add('busy');
+                    } else {
+                        seatElement.addEventListener('click', () => {
+                            if (!seatElement.classList.contains('busy')) {
+                                seatElement.classList.toggle('selected');
+                            }
+                        });
+                    }
+                    cinema.appendChild(seatElement);
+                });
+            });
+
+        buyButton.addEventListener('click', () => {
+            const selectedSeats = document.querySelectorAll('.seat.selected');
+            const seatIds = Array.from(selectedSeats).map(seat => {
+                return seatData.find(s => s.number === parseInt(seat.textContent)).id;
+            });
+
+            fetch('/buy_seats/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ seat_ids: seatIds, screening_id: screeningId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        selectedSeats.forEach(seat => {
+                            seat.classList.remove('selected');
+                            seat.classList.add('busy');
+                            seat.removeEventListener('click', null);
+                        });
+                        // Reload the page to reflect the changes
+                        window.location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+</body>
+</html>

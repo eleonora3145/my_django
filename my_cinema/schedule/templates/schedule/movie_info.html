@@ -1,0 +1,17 @@
+{% extends 'schedule/layout.html' %}
+{% block title %}<title>Movie Info</title>{% endblock %}
+
+{% block content %}
+<div class="movie-info">
+    <iframe src="{{ movie.trailer }}" frameborder="0" allowfullscreen></iframe>
+    <h1>{{ movie.title }}</h1>
+    <p>Director: {{ movie.director }}</p>
+    <p>Genres:
+        {% for genre in movie.genres.all %}
+            {{ genre.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    <p>Summary: {{ movie.summary }}</p>
+    <a href="{% url 'schedule' %}">Back to Schedule</a>
+</div>
+{% endblock %}

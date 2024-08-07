@@ -1,0 +1,57 @@
+{% extends 'schedule/layout.html' %}
+{% block title %}Schedule{% endblock %}
+
+{% block content %}
+<div class="filter-buttons">
+<button id="sortByDateButton">Sort by Date</button>
+    <button id="sortByPriceButton">Sort by Price</button>
+
+    <select id="genreSelect">
+        <option value="">All Genres</option>
+        {% for genre in genres %}
+    <OPTION Value="{{ genre.name }}">{{ genre.name }}</OPTION>
+        {% endfor %}
+
+    </select>
+    <button id="searchButton">Search</button>
+
+</div>
+<div class="schedule">
+            {% for screening in screenings %}
+
+        <div class="movie-container">
+                <img src="{{ screening.movie.photo }}">
+                <h2>{{ screening.movie.title }}</h2>
+                <p>Start Time: {{ screening.start_time }}</p>
+                <p>End Time: {{ screening.end_time }}</p>
+                <p>Price: ${{ screening.price }}</p>
+                <button><a href="{% url 'movie_info' movie_id=screening.movie.id %}">Go to film</a></button>
+                <a href="{% url 'select_seats' screening_id=screening.id %}">Buy</a>
+        </div>
+    {% endfor %}
+</div>
+<script>
+document.getElementById('sortByDateButton').addEventListener('click', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('sort_by', 'date');
+    window.location.search = urlParams.toString();
+});
+
+document.getElementById('sortByPriceButton').addEventListener('click', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('sort_by', 'price');
+    window.location.search = urlParams.toString();
+});
+
+document.getElementById('searchButton').addEventListener('click', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const genre = document.getElementById('genreSelect').value;
+    if (genre) {
+        urlParams.set('genre', genre);
+    } else {
+        urlParams.delete('genre');
+    }
+    window.location.search = urlParams.toString();
+});
+</script>
+{% endblock %}
